@@ -15,7 +15,7 @@ public class Exercise1 {
     public void sortPersonsByAgeUsingArraysSortComparator() {
         Person[] persons = getPersons();
 
-        // TODO использовать Arrays.sort
+        Arrays.sort(persons);
 
         assertArrayEquals(new Person[]{
             new Person("Иван", "Мельников", 20),
