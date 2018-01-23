@@ -15,17 +15,10 @@ public class Example4 {
         return x + y + z;
     }
 
-    // () -> (int -> (int -> (int -> int)))
-    // () -> int -> int -> int -> int
+    // () -> (Integer -> (Integer -> (Integer -> Integer)))
+    // () -> Integer -> Integer -> Integer -> Integer
     private static Function<Integer, Function<Integer, Function<Integer, Integer>>> curriedSum3UsingFunction() {
-        // FIXME преобразовать в expression-lambda
-        return x -> {
-            return y -> {
-                return z -> {
-                    return sum(x, y, z);
-                };
-            };
-        };
+        return x -> y -> z -> x + y + z;
     }
 
     private static IntFunction<IntFunction<IntFunction<Integer>>> curriedSum3UsingIntFunction() {
@@ -34,6 +27,11 @@ public class Example4 {
 
     @Test
     public void testCurriedSum3UsingFunction() {
+        int result = sum(1, 2, 3);
+
+        assertEquals(6, result);
+
+
         Function<Integer, Function<Integer, Function<Integer, Integer>>> curried3sum = curriedSum3UsingFunction();
 
         assertEquals(6, curried3sum.apply(1).apply(2).apply(3).intValue());
