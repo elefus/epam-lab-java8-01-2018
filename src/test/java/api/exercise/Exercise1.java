@@ -5,6 +5,9 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static org.junit.Assert.assertEquals;
 
@@ -19,6 +22,10 @@ public class Exercise1 {
         DECLINED
     }
 
+    private final Predicate<Person> eligibleAge = p -> p.getAge() > 21;
+    private final Function<Predicate<Person>, Function<Status, BiFunction<Person, Status, Status>>> computeHelper =
+        predicate -> statusToReplaceWith -> (p, s) -> predicate.test(p) ? Status.ACCEPTED : statusToReplaceWith;
+
     @Test
     public void acceptGreaterThan21OthersDecline() {
         Person alex = new Person("Алексей", "Мельников", 20);
@@ -29,7 +36,7 @@ public class Exercise1 {
         candidates.put(ivan, Status.PENDING);
         candidates.put(helen, Status.PENDING);
 
-        // TODO реализация
+        candidates.replaceAll(computeHelper.apply(eligibleAge).apply(Status.DECLINED));
 
         assertEquals(Status.ACCEPTED, candidates.get(ivan));
         assertEquals(Status.ACCEPTED, candidates.get(helen));
@@ -46,7 +53,8 @@ public class Exercise1 {
         candidates.put(ivan, Status.PENDING);
         candidates.put(helen, Status.PENDING);
 
-        // TODO реализация
+        candidates.keySet().removeIf(eligibleAge.negate());
+        candidates.replaceAll((k, v) -> Status.ACCEPTED);
 
         Map<Person, Status> expected = new HashMap<>();
         expected.put(ivan, Status.ACCEPTED);
@@ -63,10 +71,10 @@ public class Exercise1 {
         candidates.put(alex, Status.PENDING);
         candidates.put(ivan, Status.PENDING);
 
-        // TODO реализация
-        Status alexStatus = null;
-        Status ivanStatus = null;
-        Status helenStatus = null;
+        final Function<Person, Status> getStatusOrDefault = p -> candidates.getOrDefault(p, Status.UNKNOWN);
+        Status alexStatus = getStatusOrDefault.apply(alex);
+        Status ivanStatus = getStatusOrDefault.apply(ivan);
+        Status helenStatus = getStatusOrDefault.apply(helen);
 
         assertEquals(Status.PENDING, alexStatus);
         assertEquals(Status.PENDING, ivanStatus);
@@ -88,7 +96,7 @@ public class Exercise1 {
         newValues.put(alex, Status.DECLINED);
         newValues.put(helen, Status.PENDING);
 
-        // TODO реализация
+        oldValues.forEach(newValues::putIfAbsent);
 
         assertEquals(Status.DECLINED, newValues.get(alex));
         assertEquals(Status.ACCEPTED, newValues.get(ivan));
