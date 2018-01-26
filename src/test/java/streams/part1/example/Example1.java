@@ -12,6 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
@@ -189,5 +191,13 @@ public class Example1 {
             String[] valuesInStream = stream.toArray(String[]::new);
             assertArrayEquals(new String[]{"a", "b", "c"}, valuesInStream);
         }
+    }
+
+    @Test
+    public void streamRandomInts() {
+        int[] ints = ThreadLocalRandom.current()
+                                      .ints()
+                                      .limit(100)
+                                      .toArray();
     }
 }

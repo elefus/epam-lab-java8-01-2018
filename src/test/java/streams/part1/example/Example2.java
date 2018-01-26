@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
@@ -22,21 +23,20 @@ public class Example2 {
 
     @Test
     public void operationsOnStreamExample() {
-        Stream<List<JobHistoryEntry>> listStream = Example1.getEmployees()
-                                                           .stream()
-                                                           .filter(e -> "Иван".equals(e.getPerson().getFirstName()))
-                                                           .map(Employee::getJobHistory);
-        listStream
-                .parallel()
-                .flatMap(Collection::stream)
-                .peek(System.out::println)
-                .distinct()
-                .sorted(comparing(JobHistoryEntry::getDuration))
-                .sequential()
-                .skip(1)
-                .limit(10)
-                .unordered()
-                .findAny();
+        Optional val = Example1.getEmployees()
+                               .stream()
+                               .filter(e -> "Иван".equals(e.getPerson().getFirstName()))
+                               .map(Employee::getJobHistory)
+                               .flatMap(Collection::stream)
+                               .peek(System.out::println)
+                               .distinct()
+                               .sorted(comparing(JobHistoryEntry::getDuration))
+                               .parallel()
+                               .sequential()
+                               .unordered()
+                               .skip(1)
+                               .limit(10)
+                               .findAny();
             //  .allMatch(Predicate<T>)
             //  .anyMatch(Predicate<T>)
             //  .noneMatch(Predicate<T>)
@@ -57,11 +57,11 @@ public class Example2 {
      *            filter map flatMap peek distinct unordered sorted skip limit sequential parallel
      * IMMUTABLE        |   |       |    |        |         |      |    |     |          |
      * CONCURRENT       |   |       |    |        |         |      |    |     |          |
-     * DISTINCT         |   |       |    |        |         |      |    |     |          |
-     * NONNULL          |   |       |    |        |         |      |    |     |          |
-     * ORDERED          |   |       |    |        |         |      |    |     |          |
-     * SORTED           |   |       |    |        |         |      |    |     |          |
-     * SIZED            |   |       |    |        |         |      |    |     |          |
+     * DISTINCT         | - |   -   |    |   +    |         |      |    |     |          |
+     * NONNULL          | - |   -   |    |        |         |      |    |     |          |
+     * ORDERED          |   |       |    |        |    -    |  +   |    |     |          |
+     * SORTED           | - |   -   |    |        |    -    |  +   |    |     |          |
+     * SIZED        -   |   |   -   |    |   -    |         |      |    |     |          |
      * SUBSIZED         |   |       |    |        |         |      |    |     |          |
      */
     @Test

@@ -10,13 +10,6 @@ import java.util.Objects;
  */
 public class Employee {
 
-    public static void main(String... books) {
-        StringBuilder sb = new StringBuilder();
-        for (String book : books)
-            sb.insert(sb.indexOf("c"), book);
-        System.out.println(sb);
-    }
-
     private final Person person;
     private final List<JobHistoryEntry> jobHistory;
 
