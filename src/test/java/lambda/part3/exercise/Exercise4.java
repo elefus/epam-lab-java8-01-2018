@@ -1,10 +1,13 @@
 package lambda.part3.exercise;
 
+import com.google.common.primitives.Chars;
 import lambda.data.Employee;
+import lambda.data.JobHistoryEntry;
 import lambda.part3.example.Example1;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -14,22 +17,38 @@ import static org.junit.Assert.assertEquals;
 public class Exercise4 {
 
     private static class LazyCollectionHelper<T, R> {
+        private  List<T> source;
+        private Function<T,List<R>> remapping;
+
+        public LazyCollectionHelper(List<T> source, Function<T, List<R>> remapping) {
+            this.source = source;
+            this.remapping = remapping;
+        }
 
         public static <T> LazyCollectionHelper<T, T> from(List<T> list) {
-            throw new UnsupportedOperationException();
+            return new LazyCollectionHelper<>(list, Collections::singletonList);
         }
 
         public <U> LazyCollectionHelper<T, U> flatMap(Function<R, List<U>> flatMapping) {
-            throw new UnsupportedOperationException();
+            return new LazyCollectionHelper<>(source, remapping.andThen(transformUsing(flatMapping)));
+
         }
 
         public <U> LazyCollectionHelper<T, U> map(Function<R, U> flatMapping) {
-            throw new UnsupportedOperationException();
+            return  new LazyCollectionHelper<>(source,remapping
+                    .andThen(transformUsing(flatMapping.andThen(Collections::singletonList))));
+        }
 
+        private <FROM, TO> Function<List<FROM>, List<TO>> transformUsing(Function<FROM, List<TO>> mapper) {
+            return source -> {
+                List<TO> result = new ArrayList<>();
+                source.forEach(mapper.andThen(result::addAll)::apply);
+                return result;
+            };
         }
 
         public List<R> force() {
-            throw new UnsupportedOperationException();
+            return transformUsing(remapping).apply(source);
         }
     }
 
@@ -37,7 +56,12 @@ public class Exercise4 {
     public void mapEmployeesToCodesOfLetterTheirPositionsUsingLazyFlatMapHelper() {
         List<Employee> employees = Example1.getEmployees();
 
-        List<Integer> codes = null;
+        List<Integer> codes = LazyCollectionHelper.from(employees)
+                                                  .flatMap(Employee::getJobHistory)
+                                                  .map(JobHistoryEntry::getPosition)
+                                                  .flatMap(s-> Chars.asList(s.toCharArray()))
+                                                  .map(Integer::valueOf)
+                                                  .force();
         // TODO              LazyCollectionHelper.from(employees)
         // TODO                                  .flatMap(Employee -> JobHistoryEntry)
         // TODO                                  .map(JobHistoryEntry -> String(position))
