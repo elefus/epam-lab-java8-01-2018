@@ -73,7 +73,13 @@ public class Exercise1 {
     public void findMinimalAgeOfEmployees() {
         List<Employee> employees = Example1.getEmployees();
 
-        Integer minimalAge = employees.stream().map(Employee::getPerson).map(Person::getAge).min(Integer::compareTo).get();
+        Integer minimalAge = employees.stream()
+                                      .map(Employee::getPerson)
+                                      .mapToInt(Person::getAge)
+                                      .min()
+//                                      .map(Person::getAge)
+//                                      .min(Integer::compareTo)
+                                      .orElseThrow(IllegalStateException::new);
 
         assertEquals(21, minimalAge.intValue());
     }
