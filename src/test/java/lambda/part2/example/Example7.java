@@ -9,6 +9,7 @@ import java.util.function.IntFunction;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("SameParameterValue")
 public class Example7 {
 
     @FunctionalInterface
@@ -24,10 +25,6 @@ public class Example7 {
     }
 
     // (((String, String, int) -> Person), String) -> (String, int) -> Person
-    private BiFunction<String, Integer, Person> personFactoryWithFixedLastName(PersonFactory factory, String lastName) {
-        return (name, age) -> factory.create(name, lastName, age);
-    }
-
     @Test
     public void testCurriedPersonFactory() {
         Person person = new Person("Иван", "Мельников", 33);
@@ -43,6 +40,10 @@ public class Example7 {
         // String(lastName) -> String(name) -> int(age) -> Person
         Function<String, Function<String, IntFunction<Person>>> lambdaCurriedPersonFactory = lastName -> name -> age -> factoryUsingConstructor.create(name, lastName, age);
         assertEquals(person, lambdaCurriedPersonFactory.apply("Мельников").apply("Иван").apply(33));
+    }
+
+    private BiFunction<String, Integer, Person> personFactoryWithFixedLastName(PersonFactory factory, String lastName) {
+        return (name, age) -> factory.create(name, lastName, age);
     }
 
     @Test
