@@ -60,9 +60,21 @@ public class Exercise2 {
      */
     @Test
     public void calcTotalSalaryWithCoefficientWorkExperience() {
+        double sellary = 75000;
+        double bonus = 1.2;
+        double bonuslessDuration = 3;
         List<Employee> employees = Example1.getEmployees();
 
-        Double expected = null;
+        Double expected = employees.stream()
+                                   .map(employee -> employee.getJobHistory()
+                                                            .stream()
+                                                            .map(JobHistoryEntry::getDuration)
+                                                            .reduce((first, second) -> second)
+                                                            .orElse(0))
+                                   .mapToDouble(duration -> duration > bonuslessDuration
+                                           ? sellary * bonus
+                                           : sellary)
+                                   .sum();
 
         assertEquals(465000.0, expected, 0.001);
     }
