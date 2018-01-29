@@ -1,11 +1,14 @@
 package streams.part1.exercise;
 
 import lambda.data.Employee;
+import lambda.data.JobHistoryEntry;
 import lambda.data.Person;
 import lambda.part3.example.Example1;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -16,7 +19,12 @@ public class Exercise2 {
     public void calcAverageAgeOfEmployees() {
         List<Employee> employees = Example1.getEmployees();
 
-        Double expected = null;
+        Double expected = employees
+                .stream()
+                .map(Employee::getPerson)
+                .mapToInt(Person::getAge)
+                .average()
+                .orElseThrow(NoSuchElementException::new);
 
         assertEquals(33.66, expected, 0.1);
     }
@@ -25,7 +33,9 @@ public class Exercise2 {
     public void findPersonWithLongestFullName() {
         List<Employee> employees = Example1.getEmployees();
 
-        Person expected = null;
+        Person expected = employees
+                .stream()
+                .max(Comparator.comparingInt(e -> e.getPerson().getFullName().length())).get().getPerson();
 
         assertEquals(expected, employees.get(1).getPerson());
     }
@@ -33,9 +43,15 @@ public class Exercise2 {
     @Test
     public void findEmployeeWithMaximumDurationAtOnePosition() {
         List<Employee> employees = Example1.getEmployees();
-
-        Employee expected = null;
-
+        Employee expected =
+                employees.stream()
+                        .max(Comparator.comparingInt(e -> e
+                                .getJobHistory()
+                                .stream()
+                                .mapToInt(JobHistoryEntry::getDuration)
+                                .max()
+                                .orElse(0)))
+                        .orElseThrow(NoSuchElementException::new);
         assertEquals(expected, employees.get(4));
     }
 
@@ -48,7 +64,15 @@ public class Exercise2 {
     public void calcTotalSalaryWithCoefficientWorkExperience() {
         List<Employee> employees = Example1.getEmployees();
 
-        Double expected = null;
+        final Double wageRate = 75000.0;
+
+        Double expected =
+                employees.stream().mapToDouble(e -> {
+                    List<JobHistoryEntry> jobHistory = e.getJobHistory();
+                    int duration = jobHistory.get(jobHistory.size() - 1).getDuration();
+                    return duration > 3 ? 1.2 * wageRate : wageRate;
+                }).sum();
+
 
         assertEquals(465000.0, expected, 0.001);
     }
