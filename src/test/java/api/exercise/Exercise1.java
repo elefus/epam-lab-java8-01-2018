@@ -45,8 +45,12 @@ public class Exercise1 {
         candidates.put(alex, Status.PENDING);
         candidates.put(ivan, Status.PENDING);
         candidates.put(helen, Status.PENDING);
+//        candidates.put(new Person("a", "a", 20), Status.PENDING);
+//        candidates.put(new Person("b", "b", 20), Status.PENDING);
 
-        // TODO реализация
+        for (Map.Entry<Person, Status> personStatusEntry : candidates.entrySet()) {
+            candidates.compute(personStatusEntry.getKey(), (k2, v2) -> k2.getAge() < 21 ? null : Status.ACCEPTED);
+        }
 
         Map<Person, Status> expected = new HashMap<>();
         expected.put(ivan, Status.ACCEPTED);
@@ -88,7 +92,7 @@ public class Exercise1 {
         newValues.put(alex, Status.DECLINED);
         newValues.put(helen, Status.PENDING);
 
-        // TODO реализация
+        oldValues.forEach(((person, status) -> newValues.putIfAbsent(person, Status.ACCEPTED)));
 
         assertEquals(Status.DECLINED, newValues.get(alex));
         assertEquals(Status.ACCEPTED, newValues.get(ivan));
