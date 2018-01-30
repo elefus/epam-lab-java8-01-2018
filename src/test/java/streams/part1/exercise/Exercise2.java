@@ -65,16 +65,16 @@ public class Exercise2 {
         double bonuslessDuration = 3;
         List<Employee> employees = Example1.getEmployees();
 
+
         Double expected = employees.stream()
-                                   .map(employee -> employee.getJobHistory()
-                                                            .stream()
-                                                            .map(JobHistoryEntry::getDuration)
-                                                            .reduce((first, second) -> second)
-                                                            .orElse(0))
-                                   .mapToDouble(duration -> duration > bonuslessDuration
-                                           ? sellary * bonus
-                                           : sellary)
-                                   .sum();
+                            .map(Employee::getJobHistory)
+                            .map(jobHistoryEntries -> jobHistoryEntries.size() > 0 ?
+                                    jobHistoryEntries.get(jobHistoryEntries.size() - 1).getDuration() :
+                                    0)
+                            .mapToDouble(duration -> duration > bonuslessDuration
+                ? sellary * bonus
+                : sellary)
+                .sum();
 
         assertEquals(465000.0, expected, 0.001);
     }
