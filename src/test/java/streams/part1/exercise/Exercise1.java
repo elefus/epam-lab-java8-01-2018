@@ -68,7 +68,6 @@ public class Exercise1 {
                 employees.stream()
                         .map(Employee::getJobHistory)
                         .flatMap(jhe -> jhe.stream().map(JobHistoryEntry::getEmployer))
-                        .distinct()
                         .collect(Collectors.toSet());
 
         Set<String> expected = new HashSet<>();
