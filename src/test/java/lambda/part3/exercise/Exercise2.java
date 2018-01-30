@@ -37,6 +37,7 @@ public class Exercise2 {
          * Создает объект для маппинга, передавая ему новый список, построенный на основе исходного.
          * Для добавления в новый список каждый элемент преобразовывается с использованием заданной функции.
          * ([T], (T -> R)) -> [R]
+         *
          * @param mapping Функция преобразования элементов.
          */
         public <R> MapHelper<R> map(Function<T, R> mapping) {
@@ -49,6 +50,7 @@ public class Exercise2 {
          * Создает объект для маппинга, передавая ему новый список, построенный на основе исходного.
          * Для добавления в новый список каждый элемент преобразовывается в список с использованием заданной функции.
          * ([T], (T -> [R])) -> [R]
+         *
          * @param flatMapping Функция преобразования элементов.
          */
         public <R> MapHelper<R> flatMap(Function<T, List<R>> flatMapping) {
@@ -75,14 +77,15 @@ public class Exercise2 {
         List<Employee> employees = Example1.getEmployees();
 
         List<Integer> codes = MapHelper.from(employees)
-                                        .flatMap(Employee::getJobHistory)
-                                        .map(JobHistoryEntry::getPosition)
-                                        .flatMap(string -> string.chars().boxed().collect(toList()))
-                                        .getMapped();
+                                       .flatMap(Employee::getJobHistory)
+                                       .map(JobHistoryEntry::getPosition)
+                                       .flatMap(Exercise2::calcCodes)
+                                       .map(Integer::intValue)
+                                       .getMapped();
         assertEquals(calcCodes("dev", "dev", "tester", "dev", "dev", "QA", "QA", "dev", "tester", "tester", "QA", "QA", "QA", "dev"), codes);
     }
 
-    private static List<Integer> calcCodes(String...strings) {
+    private static List<Integer> calcCodes(String... strings) {
         List<Integer> codes = new ArrayList<>();
         for (String string : strings) {
             for (char letter : string.toCharArray()) {
