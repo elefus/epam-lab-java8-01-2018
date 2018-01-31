@@ -72,7 +72,19 @@ public class Exercise1 {
         List<Employee> employees = Example1.getEmployees();
 
         // TODO реализация
-        Map<String, Set<Person>> result = null;
+        Map<String, Set<Person>> result = employees.stream()
+                                                    .collect(Collectors.toMap(
+                                                                                e -> e.getJobHistory().get(0).getPosition(),
+                                                                                e -> {
+                                                                                    HashSet<Person> hs = new HashSet<>();
+                                                                                    hs.add(e.getPerson());
+                                                                                    return hs;
+                                                                                },
+                                                                                (left, right) -> {
+                                                                                    left.addAll(right);
+                                                                                    return left;
+                                                                                }
+                                                            ));
 
         Map<String, Set<Person>> expected = new HashMap<>();
         expected.put("QA", new HashSet<>(Arrays.asList(employees.get(2).getPerson(), employees.get(5).getPerson())));
@@ -91,7 +103,10 @@ public class Exercise1 {
         List<Employee> employees = Example1.getEmployees();
 
         // TODO реализация
-        Map<String, Set<Person>> result = null;
+        Map<String, Set<Person>> result = employees.stream()
+                                                    .collect(Collectors.groupingBy(
+                                                                                    e -> e.getJobHistory().get(0).getPosition(),
+                                                                                    Collectors.mapping(Employee::getPerson, Collectors.toSet())));
 
         Map<String, Set<Person>> expected = new HashMap<>();
         expected.put("QA", new HashSet<>(Arrays.asList(employees.get(2).getPerson(), employees.get(5).getPerson())));
