@@ -67,12 +67,12 @@ public class Exercise2 {
 
 
         Double expected = employees.stream()
-                            .map(Employee::getJobHistory)
-                            .map(jobHistoryEntries -> jobHistoryEntries.get(jobHistoryEntries.size() - 1).getDuration())
-                            .mapToDouble(duration -> duration > bonuslessDuration
-                ? sellary * bonus
-                : sellary)
-                .sum();
+                                   .map(Employee::getJobHistory)
+                                   .map(jobHistoryEntries -> jobHistoryEntries.get(jobHistoryEntries.size() - 1).getDuration())
+                                   .mapToDouble(duration -> duration > bonuslessDuration
+                                           ? sellary * bonus
+                                           : sellary)
+                                   .sum();
 
         assertEquals(465000.0, expected, 0.001);
     }
