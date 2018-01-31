@@ -68,9 +68,7 @@ public class Exercise2 {
 
         Double expected = employees.stream()
                             .map(Employee::getJobHistory)
-                            .map(jobHistoryEntries -> jobHistoryEntries.size() > 0 ?
-                                    jobHistoryEntries.get(jobHistoryEntries.size() - 1).getDuration() :
-                                    0)
+                            .map(jobHistoryEntries -> jobHistoryEntries.get(jobHistoryEntries.size() - 1).getDuration())
                             .mapToDouble(duration -> duration > bonuslessDuration
                 ? sellary * bonus
                 : sellary)
