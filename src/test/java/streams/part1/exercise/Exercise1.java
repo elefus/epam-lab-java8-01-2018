@@ -40,10 +40,10 @@ public class Exercise1 {
         List<Employee> employees = Example1.getEmployees();
 
         // TODO реализация, использовать Collectors.toList()
-        List<Person> startedFromEpam =
-                employees.stream().filter(employee -> employee.getJobHistory().stream()
-                                                              .findFirst().filter(jobHistoryEntry -> jobHistoryEntry.getEmployer().equals("EPAM"))
-                                                              .isPresent()).map(Employee::getPerson).collect(Collectors.toList());
+        List<Person> startedFromEpam = employees.stream()
+                                                .filter(employee ->
+                                                        employee.getJobHistory().get(0).getEmployer().equals("EPAM"))
+                                                .map(Employee::getPerson).collect(Collectors.toList());
 
         List<Person> expected = Arrays.asList(
                 employees.get(0).getPerson(),
