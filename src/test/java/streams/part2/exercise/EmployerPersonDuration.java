@@ -3,9 +3,9 @@ package streams.part2.exercise;
 import lambda.data.Person;
 
 public class EmployerPersonDuration {
-    private final Person person;
-    private final int duration;
-    private final String employer;
+    private  Person person;
+    private  int duration;
+    private  String employer;
 
     public EmployerPersonDuration(String employer, Person person, int duration) {
         this.person = person;
@@ -13,7 +13,20 @@ public class EmployerPersonDuration {
         this.employer = employer;
     }
 
+    public void setPerson(Person person) {
+        this.person = person;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
+    public void setEmployer(String employer) {
+        this.employer = employer;
+    }
+
     public Person getPerson() {
+
         return person;
     }
 

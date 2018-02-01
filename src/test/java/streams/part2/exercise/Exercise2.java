@@ -7,7 +7,9 @@ import lambda.part3.example.Example1;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
@@ -72,12 +74,7 @@ public class Exercise2 {
 
         Map<String, Set<Person>> result =
                 employees.stream()
-                         .flatMap(employee ->
-                                 employee.getJobHistory().stream()
-                                         .map(jobHistoryEntry ->
-                                                 new EmployerPersonDuration(jobHistoryEntry.getEmployer(),
-                                                         employee.getPerson(),
-                                                         jobHistoryEntry.getDuration())))
+                         .flatMap(getEmployerPersonDuration())
                          .collect(Collectors
                                  .groupingBy(EmployerPersonDuration::getEmployer,
                                          Collectors.mapping(EmployerPersonDuration::getPerson,
@@ -191,15 +188,56 @@ public class Exercise2 {
     @Test
     public void greatestExperiencePerEmployer() {
         List<Employee> employees = Example1.getEmployees();
+        Map<String, Person> collect = employees.stream()
+                                               .flatMap(getEmployerPersonDuration())
+                                               .collect(Collectors.groupingBy(EmployerPersonDuration::getEmployer,
+                                                       Collectors.groupingBy(EmployerPersonDuration::getPerson,
+                                                               Collectors.summingInt(EmployerPersonDuration::getDuration)
+                                                       ))).entrySet().stream().map(getEntryEmployerPersonDurationFunction()
+                ).collect(Collectors.groupingBy(EmployerPersonDuration::getEmployer,
+                        Collectors.mapping(EmployerPersonDuration::getPerson, Collectors.toSet())))
+                                               .entrySet().stream()
+                                               .collect(Collectors.toMap(Map.Entry::getKey,
+                                                       entry -> entry.getValue()
+                                                                     .stream()
+                                                                     .findFirst()
+                                                                     .orElseThrow(IllegalStateException::new)));
 
-        Map<String, Person> collect = null;
 
         Map<String, Person> expected = new HashMap<>();
         expected.put("EPAM", employees.get(4).getPerson());
-        expected.put("google", employees.get(1).getPerson());
+        expected.put("google", employees.get(0).getPerson());
         expected.put("yandex", employees.get(2).getPerson());
         expected.put("mail.ru", employees.get(2).getPerson());
         expected.put("T-Systems", employees.get(5).getPerson());
         assertEquals(expected, collect);
     }
+
+    private Function<Map.Entry<String, Map<Person, Integer>>, EmployerPersonDuration> getEntryEmployerPersonDurationFunction() {
+        return stringMapEntry ->
+        {
+            Map.Entry<Person, Integer> personIntegerEntry = stringMapEntry
+                    .getValue()
+                    .entrySet()
+                    .stream()
+                    .max(Comparator.comparing(Map.Entry::getValue))
+                    .orElseThrow(IllegalStateException::new);
+            return new EmployerPersonDuration(stringMapEntry.getKey(),
+                    personIntegerEntry.getKey(),
+                    personIntegerEntry.getValue()
+            );
+        };
+    }
+
+    private Function<Employee, Stream<? extends EmployerPersonDuration>> getEmployerPersonDuration() {
+        return employee ->
+                employee.getJobHistory()
+                        .stream()
+                        .map(jobHistoryEntry ->
+                                new EmployerPersonDuration(
+                                        jobHistoryEntry.getEmployer(),
+                                        employee.getPerson(),
+                                        jobHistoryEntry.getDuration()));
+    }
+
 }
