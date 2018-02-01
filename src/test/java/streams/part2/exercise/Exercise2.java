@@ -1,6 +1,7 @@
 package streams.part2.exercise;
 
 import lambda.data.Employee;
+import lambda.data.JobHistoryEntry;
 import lambda.data.Person;
 import lambda.part3.example.Example1;
 import org.junit.Test;
@@ -69,15 +70,18 @@ public class Exercise2 {
     public void employersStuffList() {
         List<Employee> employees = Example1.getEmployees();
 
-        Map<String, Set<Person>> result = employees.stream()
-                                                   .flatMap(employee -> employee.getJobHistory().stream()
-                                                                                .map(jobHistoryEntry -> new EmployerPersonDuration(jobHistoryEntry.getEmployer(),
-                                                                                        employee.getPerson(),
-                                                                                        jobHistoryEntry.getDuration())))
-                                                   .collect(Collectors
-                                                           .groupingBy(EmployerPersonDuration::getEmployer,
-                                                                   Collectors.mapping(EmployerPersonDuration::getPerson,
-                                                                           Collectors.toSet())));
+        Map<String, Set<Person>> result =
+                employees.stream()
+                         .flatMap(employee ->
+                                 employee.getJobHistory().stream()
+                                         .map(jobHistoryEntry ->
+                                                 new EmployerPersonDuration(jobHistoryEntry.getEmployer(),
+                                                         employee.getPerson(),
+                                                         jobHistoryEntry.getDuration())))
+                         .collect(Collectors
+                                 .groupingBy(EmployerPersonDuration::getEmployer,
+                                         Collectors.mapping(EmployerPersonDuration::getPerson,
+                                                 Collectors.toSet())));
 
 
         Map<String, Set<Person>> expected = new HashMap<>();
@@ -152,7 +156,19 @@ public class Exercise2 {
     public void indexByFirstEmployer() {
         List<Employee> employees = Example1.getEmployees();
 
-        Map<String, Set<Person>> result = null;
+        Map<String, Set<Person>> result =
+                employees.stream()
+                         .map(employee -> {
+                             JobHistoryEntry jobHistoryEntry = employee.getJobHistory().get(0);
+                             return new EmployerPersonDuration(jobHistoryEntry.getEmployer(),
+                                     employee.getPerson(),
+                                     jobHistoryEntry.getDuration());
+                         })
+                         .collect(Collectors
+                                 .groupingBy(EmployerPersonDuration::getEmployer,
+                                         Collectors.mapping(EmployerPersonDuration::getPerson,
+                                                 Collectors.toSet())));
+
 
         Map<String, Set<Person>> expected = new HashMap<>();
         expected.put("yandex", new HashSet<>(Collections.singletonList(employees.get(2).getPerson())));
