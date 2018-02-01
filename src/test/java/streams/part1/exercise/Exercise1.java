@@ -45,9 +45,7 @@ public class Exercise1 {
                 employees
                         .stream()
                         .filter(e -> e.getJobHistory()
-                                .stream()
-                                .findFirst()
-                                .get()
+                                .get(0)
                                 .getEmployer()
                                 .equals("EPAM"))
                         .map(Employee::getPerson)
