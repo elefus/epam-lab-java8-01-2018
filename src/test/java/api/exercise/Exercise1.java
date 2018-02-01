@@ -53,8 +53,7 @@ public class Exercise1 {
         candidates.put(ivan, Status.PENDING);
         candidates.put(helen, Status.PENDING);
 
-        candidates.keySet().removeIf(eligibleAge.negate());
-        candidates.replaceAll((k, v) -> Status.ACCEPTED);
+        // TODO реализация
 
         Map<Person, Status> expected = new HashMap<>();
         expected.put(ivan, Status.ACCEPTED);
@@ -96,7 +95,7 @@ public class Exercise1 {
         newValues.put(alex, Status.DECLINED);
         newValues.put(helen, Status.PENDING);
 
-        oldValues.forEach(newValues::putIfAbsent);
+        // TODO реализация
 
         assertEquals(Status.DECLINED, newValues.get(alex));
         assertEquals(Status.ACCEPTED, newValues.get(ivan));
