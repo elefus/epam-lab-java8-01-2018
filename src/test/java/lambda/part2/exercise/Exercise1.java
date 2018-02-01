@@ -21,10 +21,8 @@ public class Exercise1 {
         // TODO создать переменную ageExtractor: Person -> Integer, используя Function и ссылку на метод
 
         Function<Person, Integer> ageExtractor = Person::getAge;
-         assertEquals(33, ageExtractor.apply(person).intValue());
 
-        // FIXME удалить при реализации
-//        throw new UnsupportedOperationException("Not implemented");
+        assertEquals(33, ageExtractor.apply(person).intValue());
     }
 
     @Test
@@ -36,12 +34,9 @@ public class Exercise1 {
         // TODO создать переменную sameAgesChecker: (Person, Person) -> boolean, используя BiPredicate
         BiPredicate<Person, Person> sameAgesChecker = (personL, personR) -> personL.getAge() == personR.getAge();
 
-         assertTrue(sameAgesChecker.test(person1, person2));
-         assertFalse(sameAgesChecker.test(person1, person3));
-         assertFalse(sameAgesChecker.test(person2, person3));
-
-        // FIXME удалить при реализации
-//        throw new UnsupportedOperationException("Not implemented");
+        assertTrue(sameAgesChecker.test(person1, person2));
+        assertFalse(sameAgesChecker.test(person1, person3));
+        assertFalse(sameAgesChecker.test(person2, person3));
     }
 
     // TODO метод getFullName: Person -> String, извлекающий из объекта Person строку в формате "имя фамилия".
@@ -53,10 +48,7 @@ public class Exercise1 {
     // TODO - принимающий способ извлечения полного имени из объекта Person
     // TODO - возвращающий BiFunction, сравнивающий два объекта Person и возвращающий возраст того, чье полное имя длиннее.
      private static BiFunction<Person, Person, Integer> createExtractorAgeOfPersonWithTheLongestFullName(Function<Person, String> fullNameExtractor) {
-        return (personL, personR) -> {
-          int result =  fullNameExtractor.apply(personL).length() > fullNameExtractor.apply(personR).length() ? personL.getAge() : personR.getAge();
-          return result;
-        };
+        return (personL, personR) -> fullNameExtractor.apply(personL).length() > fullNameExtractor.apply(personR).length() ? personL.getAge() : personR.getAge();
      }
 
     @Test
