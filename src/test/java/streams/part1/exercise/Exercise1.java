@@ -6,6 +6,7 @@ import lambda.part3.example.Example1;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,13 +18,20 @@ public class Exercise1 {
         List<Employee> employees = Example1.getEmployees();
 
         // TODO реализация, использовать Collectors.toList()
-        List<Person> personsEverWorkedInEpam = null;
+        List<Person> personsEverWorkedInEpam = employees.stream()
+                                                        .filter(employee -> employee.getJobHistory().stream()
+                                                                                                    .map(jobEntry -> jobEntry.getEmployer())
+                                                                                                    .anyMatch("EPAM"::equals))
+                                                        .map(Employee::getPerson)
+                                                        .collect(Collectors.toList());
+
 
         List<Person> expected = Arrays.asList(
                 employees.get(0).getPerson(),
                 employees.get(1).getPerson(),
                 employees.get(4).getPerson(),
                 employees.get(5).getPerson());
+
         assertEquals(expected, personsEverWorkedInEpam);
     }
 
@@ -32,7 +40,9 @@ public class Exercise1 {
         List<Employee> employees = Example1.getEmployees();
 
         // TODO реализация, использовать Collectors.toList()
-        List<Person> startedFromEpam = null;
+        List<Person> startedFromEpam = employees.stream().filter(employee -> "EPAM".equals(employee.getJobHistory().get(0).getEmployer()))
+                                                         .map(Employee::getPerson)
+                                                         .collect(Collectors.toList());
 
         List<Person> expected = Arrays.asList(
                 employees.get(0).getPerson(),
@@ -46,7 +56,18 @@ public class Exercise1 {
         List<Employee> employees = Example1.getEmployees();
 
         // TODO реализация, использовать Collectors.toSet()
-        Set<String> companies = null;
+        Set<String> companies = employees.stream()
+//                                         .map(employee -> employee.getJobHistory().stream())
+                                         .map(employee -> employee.getJobHistory().stream()
+                                                                                  .flatMap(jobEntry -> jobEntry.getEmployer()))
+//                                         .map(Employee::getJobHistory)
+//                                         .flatMap(jobEntry -> jobEntry)
+
+                                         .collect(Collectors.toSet());
+
+//        collection2.stream().flatMap((p) -> Arrays.asList(p.split(",")).stream()).toArray(String[]::new)
+
+
 
         Set<String> expected = new HashSet<>();
         expected.add("EPAM");
