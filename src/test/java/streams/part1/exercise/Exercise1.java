@@ -1,6 +1,7 @@
 package streams.part1.exercise;
 
 import lambda.data.Employee;
+import lambda.data.JobHistoryEntry;
 import lambda.data.Person;
 import lambda.part3.example.Example1;
 import org.junit.Test;
@@ -57,12 +58,8 @@ public class Exercise1 {
 
         // TODO реализация, использовать Collectors.toSet()
         Set<String> companies = employees.stream()
-//                                         .map(employee -> employee.getJobHistory().stream())
-                                         .map(employee -> employee.getJobHistory().stream()
-                                                                                  .flatMap(jobEntry -> jobEntry.getEmployer()))
-//                                         .map(Employee::getJobHistory)
-//                                         .flatMap(jobEntry -> jobEntry)
-
+                                         .flatMap(employee -> employee.getJobHistory().stream())
+                                         .map(JobHistoryEntry::getEmployer)
                                          .collect(Collectors.toSet());
 
 //        collection2.stream().flatMap((p) -> Arrays.asList(p.split(",")).stream()).toArray(String[]::new)
