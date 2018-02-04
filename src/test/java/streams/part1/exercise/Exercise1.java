@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
@@ -62,10 +63,6 @@ public class Exercise1 {
                                          .map(JobHistoryEntry::getEmployer)
                                          .collect(Collectors.toSet());
 
-//        collection2.stream().flatMap((p) -> Arrays.asList(p.split(",")).stream()).toArray(String[]::new)
-
-
-
         Set<String> expected = new HashSet<>();
         expected.add("EPAM");
         expected.add("google");
@@ -80,7 +77,10 @@ public class Exercise1 {
         List<Employee> employees = Example1.getEmployees();
 
         // TODO реализация
-        Integer minimalAge = null;
+        Integer minimalAge = employees.stream()
+                                      .flatMap(employee -> Stream.of(employee.getPerson().getAge()))
+                                      .min(Integer::compare)
+                                      .orElseThrow(IllegalStateException::new);
 
         assertEquals(21, minimalAge.intValue());
     }
