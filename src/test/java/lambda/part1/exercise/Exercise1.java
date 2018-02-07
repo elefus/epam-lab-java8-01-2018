@@ -62,7 +62,11 @@ public class Exercise1 {
         Arrays.sort(persons, new Comparator<Person>() {
             @Override
             public int compare(Person left, Person right) {
-                return left.getFirstName().compareTo(right.getFirstName());
+                int lastnameCompare = left.getLastName().compareTo(right.getLastName());
+                if (lastnameCompare == 0)
+                    return left.getFirstName().compareTo(right.getFirstName());
+                else
+                    return lastnameCompare;
             }
         });
 
