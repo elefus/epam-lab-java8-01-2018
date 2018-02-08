@@ -1,12 +1,18 @@
 package streams.part2.exercise;
 
 import lambda.data.Employee;
+import lambda.data.JobHistoryEntry;
 import lambda.data.Person;
 import lambda.part3.example.Example1;
 import org.junit.Test;
+import streams.part2.example.data.PersonEmployerDuration;
+import streams.part2.example.data.PersonEmployerPair;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.*;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("ConstantConditions")
@@ -64,11 +70,23 @@ public class Exercise2 {
      *    "T-Systems" -> [ {Анна Светличная 21} ]
      * ]
      */
+
+    private static Stream<PersonEmployerPair> getPersonEmployerPairStream(Employee employee) {
+        return employee.getJobHistory()
+                .stream()
+                .map(JobHistoryEntry::getEmployer)
+                .map(employer -> new PersonEmployerPair(employee.getPerson(), employer));
+    }
+
     @Test
     public void employersStuffList() {
         List<Employee> employees = Example1.getEmployees();
 
-        Map<String, Set<Person>> result = null;
+        Map<String, Set<Person>> result = employees.stream()
+                                                    .parallel()
+                                                    .flatMap(Exercise2::getPersonEmployerPairStream)
+                                                    .collect(Collectors.groupingBy(PersonEmployerPair::getEmployer,
+                                                            mapping(PersonEmployerPair::getPerson, toSet())));
 
         Map<String, Set<Person>> expected = new HashMap<>();
         expected.put("yandex", new HashSet<>(Collections.singletonList(employees.get(2).getPerson())));
@@ -142,7 +160,9 @@ public class Exercise2 {
     public void indexByFirstEmployer() {
         List<Employee> employees = Example1.getEmployees();
 
-        Map<String, Set<Person>> result = null;
+        Map<String, Set<Person>> result = employees.stream()
+                                                    .collect(groupingBy(e -> e.getJobHistory().get(0).getEmployer(),
+                                                            mapping(Employee::getPerson, toSet())));
 
         Map<String, Set<Person>> expected = new HashMap<>();
         expected.put("yandex", new HashSet<>(Collections.singletonList(employees.get(2).getPerson())));
@@ -166,7 +186,17 @@ public class Exercise2 {
     public void greatestExperiencePerEmployer() {
         List<Employee> employees = Example1.getEmployees();
 
-        Map<String, Person> collect = null;
+        Map<String, Person> collect = employees.stream()
+                                                .parallel()
+                                                .flatMap(employee -> employee.getJobHistory()
+                                                                            .stream()
+                                                                            .collect(groupingBy(JobHistoryEntry::getEmployer, summingInt(JobHistoryEntry::getDuration)))
+                                                                            .entrySet()
+                                                                            .stream()
+                                                                            .map(entry -> new PersonEmployerDuration(employee.getPerson(), entry.getKey(), entry.getValue())))
+                                                .collect(groupingBy(PersonEmployerDuration::getEmployer,
+                                                        collectingAndThen(maxBy(Comparator.comparingInt(PersonEmployerDuration::getDuration)),
+                                                                entry -> entry.orElseThrow(IllegalStateException::new).getPerson())));
 
         Map<String, Person> expected = new HashMap<>();
         expected.put("EPAM", employees.get(4).getPerson());
