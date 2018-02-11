@@ -16,7 +16,10 @@ public class Exercise2 {
     public void calcAverageAgeOfEmployees() {
         List<Employee> employees = Example1.getEmployees();
 
-        Double expected = null;
+        Double expected = employees.stream()
+                                   .mapToInt(employee -> employee.getPerson().getAge())
+                                   .average()
+                                   .orElseThrow(IllegalStateException::new);
 
         assertEquals(33.66, expected, 0.1);
     }
@@ -25,7 +28,10 @@ public class Exercise2 {
     public void findPersonWithLongestFullName() {
         List<Employee> employees = Example1.getEmployees();
 
-        Person expected = null;
+        Person expected = employees.stream()
+                                   .map(Employee::getPerson)
+                                   .max(Comparator.comparingInt(name -> name.getFullName().length()))
+                                   .orElseThrow(IllegalStateException::new);
 
         assertEquals(expected, employees.get(1).getPerson());
     }
