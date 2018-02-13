@@ -7,6 +7,8 @@ import lambda.part3.example.Example1;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -37,7 +39,11 @@ public class Exercise1 {
         List<Employee> employees = Example1.getEmployees();
 
         // TODO реализация
-        Set<Person> workedAsQa = null;
+        Set<Person> workedAsQa = employees.stream()
+                                          .filter(o -> o.getJobHistory().stream()
+                                                        .anyMatch(place -> "QA".equals(place.getPosition())))
+                                          .map(Employee::getPerson)
+                                          .collect(Collectors.toSet());
 
         assertEquals(new HashSet<>(Arrays.asList(
             employees.get(2).getPerson(),
