@@ -1,6 +1,7 @@
 package streams.part2.exercise;
 
 import lambda.data.Employee;
+import lambda.data.JobHistoryEntry;
 import lambda.data.Person;
 import lambda.part3.example.Example1;
 import org.junit.Test;
@@ -17,9 +18,18 @@ public class Exercise1 {
         List<Employee> employees = Example1.getEmployees();
 
         // TODO реализация
-        Long hours = null;
+        Long hours = employees.stream()
+                              .map(Employee::getJobHistory)
+//                              .flatMap(o -> o.stream())
+                              .flatMap(Collection::stream)
+                              .filter(place -> "EPAM".equals(place.getEmployer()))
+//                              .mapToLong(o -> o.getDuration())
+                              .mapToLong(JobHistoryEntry::getDuration)
+//                              .reduce((f, s) -> f + s).orElse(0);
+                              .sum();
 
-        assertEquals(18, hours.longValue());
+//        assertEquals(18, hours.longValue());
+        assertEquals(19, hours.longValue());
     }
 
     @Test
