@@ -57,7 +57,7 @@ public class Exercise1 {
         List<Employee> employees = Example1.getEmployees();
 
         // TODO реализация
-        String result = null;
+        String result = employees.stream().map(o -> o.getPerson().getFullName()).collect(Collectors.joining("\n"));
 
         assertEquals("Иван Мельников\n"
                    + "Александр Дементьев\n"
