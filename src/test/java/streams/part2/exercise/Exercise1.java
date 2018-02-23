@@ -104,7 +104,11 @@ public class Exercise1 {
         List<Employee> employees = Example1.getEmployees();
 
         // TODO реализация
-        Map<String, Set<Person>> result = null;
+        Map<String, Set<Person>> result = employees.stream()
+                                                   .collect(
+                                                           Collectors.groupingBy(o -> o.getJobHistory().get(0).getPosition(),
+                                                           Collectors.mapping(Employee::getPerson, Collectors.toSet())
+                                                           ));
 
         Map<String, Set<Person>> expected = new HashMap<>();
         expected.put("QA", new HashSet<>(Arrays.asList(employees.get(2).getPerson(), employees.get(5).getPerson())));
