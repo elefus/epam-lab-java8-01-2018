@@ -28,9 +28,18 @@ public class UnfairRectangleSpliterator extends Spliterators.AbstractIntSplitera
 
     @Override
     public OfInt trySplit() {
-//        int mid = startInclusive + (int) (estimateSize() / 2);
-//        return new UnfairRectangleSpliterator(data, startInclusive, startInclusive = mid);
-        throw new UnsupportedOperationException();
+        int remaining = (int) (estimateSize() / 2);
+
+        int xMid = xStart;
+        int yMid = yStart;
+        for (int i = 0; i <= remaining; i++) {
+            xMid++;
+            if (xMid == data[0].length) {
+                xMid = 0;
+                yMid++;
+            }
+        }
+        return new UnfairRectangleSpliterator(data, xStart = xMid, data[0].length, yStart = yMid, data.length );
     }
 
     @Override
