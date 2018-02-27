@@ -106,9 +106,9 @@ public class Example1 {
         Stream.Builder<String> builder = Stream.builder();
 
         Stream<String> stream = builder.add("Goodbye")
-                                       .add("cruel")
-                                       .add("world")
-                                       .build();
+                .add("cruel")
+                .add("world")
+                .build();
         String[] valuesInStream = stream.toArray(String[]::new);
 
         assertArrayEquals(new String[]{"Goodbye", "cruel", "world"}, valuesInStream);
@@ -120,7 +120,7 @@ public class Example1 {
 
         Stream<Integer> stream = Stream.iterate(1, oddNumbersGenerator);
         Integer[] first10ValuesInStream = stream.limit(10)
-                                                .toArray(Integer[]::new);
+                .toArray(Integer[]::new);
 
         assertArrayEquals(new Integer[]{1, 3, 5, 7, 9, 11, 13, 15, 17, 19}, first10ValuesInStream);
     }
@@ -132,7 +132,7 @@ public class Example1 {
         Stream<String> stream = Stream.generate(supplier);
 
         String[] first3ValuesInStream = stream.limit(3)
-                                              .toArray(String[]::new);
+                .toArray(String[]::new);
 
         assertArrayEquals(new String[]{"YOLO", "YOLO", "YOLO"}, first3ValuesInStream);
     }
@@ -196,8 +196,8 @@ public class Example1 {
     @Test
     public void streamRandomInts() {
         int[] ints = ThreadLocalRandom.current()
-                                      .ints()
-                                      .limit(100)
-                                      .toArray();
+                .ints()
+                .limit(100)
+                .toArray();
     }
 }
