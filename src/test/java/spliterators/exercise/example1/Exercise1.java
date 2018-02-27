@@ -18,7 +18,7 @@ public class Exercise1 {
                              .limit(10)
                              .toArray(int[][]::new);
 
-        IntStream stream = StreamSupport.intStream(new RectangleSpliterator(data), false);
+        IntStream stream = StreamSupport.intStream(new UnfairRectangleSpliterator(data), false);
 
         assertEquals(50, stream.sum());
     }
@@ -32,7 +32,7 @@ public class Exercise1 {
                              .toArray(int[][]::new);
         data[0][0] = 0;
 
-        IntStream stream = StreamSupport.intStream(new RectangleSpliterator(data), false);
+        IntStream stream = StreamSupport.intStream(new UnfairRectangleSpliterator(data), false);
 
         assertEquals(0, stream.min().orElseThrow(IllegalStateException::new));
     }
@@ -46,7 +46,7 @@ public class Exercise1 {
                              .toArray(int[][]::new);
         data[3][3] = 50;
 
-        IntStream stream = StreamSupport.intStream(new RectangleSpliterator(data), true);
+        IntStream stream = StreamSupport.intStream(new UnfairRectangleSpliterator(data), true);
 
         assertEquals(50, stream.max().orElseThrow(IllegalStateException::new));
     }

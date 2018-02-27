@@ -3,13 +3,23 @@ package spliterators.exercise.example1;
 import java.util.Spliterators;
 import java.util.function.IntConsumer;
 
-public class RectangleSpliterator extends Spliterators.AbstractIntSpliterator {
+public class UnfairRectangleSpliterator extends Spliterators.AbstractIntSpliterator {
 
-    public RectangleSpliterator(int[][] data) {
+    /**
+     * 0 1 2 3 4
+     * ---------
+     * 2 3 4 5 6
+     * 2 4 5 6 7
+     *
+     * 0 1 2 3 4
+     * 2 3 / 4 5 6
+     * 2 4 5 6 7
+     */
+    public UnfairRectangleSpliterator(int[][] data) {
         this();
     }
 
-    private RectangleSpliterator() {
+    private UnfairRectangleSpliterator() {
         super(0, 0);
         throw new UnsupportedOperationException();
     }
