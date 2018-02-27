@@ -38,7 +38,9 @@ public class IntArraySpliterator extends Spliterators.AbstractIntSpliterator {
     @Override
     public OfInt trySplit() {
         int mid = startInclusive + (int)(estimateSize() / 2);
-        return new IntArraySpliterator(data, startInclusive, startInclusive = mid);
+        int y = startInclusive;
+        startInclusive = mid;
+        return new IntArraySpliterator(data, y, mid);
     }
 
     @Override

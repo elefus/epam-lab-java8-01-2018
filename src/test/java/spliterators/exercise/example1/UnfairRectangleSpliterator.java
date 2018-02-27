@@ -1,10 +1,9 @@
 package spliterators.exercise.example1;
 
 import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.function.IntConsumer;
 
-public class UnfairRectangleSpliterator extends Spliterators.AbstractIntSpliterator {
+public class UnfairRectangleSpliterator implements Spliterator.OfInt {
 
     private int xStart;
     private int xEnd;
@@ -17,8 +16,6 @@ public class UnfairRectangleSpliterator extends Spliterators.AbstractIntSplitera
     }
 
     private UnfairRectangleSpliterator(int[][] data, int xStart, int xEnd, int yStart, int yEnd) {
-        super(data.length, Spliterator.IMMUTABLE | Spliterator.NONNULL
-                | Spliterator.ORDERED | Spliterator.SIZED);
         this.data = data;
         this.xStart = xStart;
         this.xEnd = xEnd;
@@ -28,23 +25,30 @@ public class UnfairRectangleSpliterator extends Spliterators.AbstractIntSplitera
 
     @Override
     public OfInt trySplit() {
-        int remaining = (int) (estimateSize() / 2);
+        if (estimateSize() > data[0].length) {
+            long size = estimateSize();
+            int remaining = (int) (size / 2);
 
-        int xMid = xStart;
-        int yMid = yStart;
-        for (int i = 0; i <= remaining; i++) {
-            xMid++;
-            if (xMid == data[0].length) {
-                xMid = 0;
-                yMid++;
+            int xMid = xStart;
+            int yMid = yStart;
+            for (int i = 0; i <= remaining; i++) {
+                xMid++;
+                if (xMid == data[0].length) {
+                    xMid = 0;
+                    yMid++;
+                }
             }
+            xStart = xMid;
+            yStart = yMid;
+            return new UnfairRectangleSpliterator(data, 0, data[0].length, 0, yMid);
+        } else {
+            return null;
         }
-        return new UnfairRectangleSpliterator(data, xStart = xMid, data[0].length, yStart = yMid, data.length );
     }
 
     @Override
     public long estimateSize() {
-        return (xEnd - xStart) + (data[0].length * (yEnd - yStart));
+        return (xEnd - xStart) + (data[0].length * (yEnd - yStart - 1));
     }
 
     @Override
@@ -60,10 +64,15 @@ public class UnfairRectangleSpliterator extends Spliterators.AbstractIntSplitera
 
     @Override
     public void forEachRemaining(IntConsumer action) {
-        while(yStart != yEnd) {
+        while (yStart != yEnd) {
             action.accept(data[yStart][xStart++]);
             resetStart();
         }
+    }
+
+    @Override
+    public int characteristics() {
+        return ORDERED | NONNULL | SIZED | IMMUTABLE | SUBSIZED;
     }
 
     private void resetStart() {
