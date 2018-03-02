@@ -35,7 +35,10 @@ public class Exercise2 {
 
         Person expected = employees
                 .stream()
-                .max(Comparator.comparingInt(e -> e.getPerson().getFullName().length())).get().getPerson();
+                .map(Employee::getPerson)
+                .max(Comparator
+                        .comparingInt(p -> p.getFullName().length()))
+                .orElseThrow(() -> new RuntimeException("Help!!!"));
 
         assertEquals(expected, employees.get(1).getPerson());
     }
