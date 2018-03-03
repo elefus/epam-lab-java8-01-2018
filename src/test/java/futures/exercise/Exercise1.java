@@ -10,9 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static java.lang.System.lineSeparator;
 import static org.junit.Assert.assertEquals;
@@ -22,10 +20,12 @@ public class Exercise1 {
 
     @Test
     public void vanillaFutureExample() throws Exception {
-        test(() -> {
-            Employee result = null;
+        ExecutorService service = Executors.newFixedThreadPool(4);
 
+        test(() -> {
             // TODO использовать Executors.newFixedThreadPool(4), Future<T> и метод getEmployee: Person -> Employee
+            Future<Employee> employeeFuture = service.submit(() -> getEmployee(getPerson("Дмитрий", "Сашков")));
+            Employee result = employeeFuture.get();
 
             return result;
         });
@@ -33,10 +33,13 @@ public class Exercise1 {
 
     @Test
     public void completableFutureExample() throws Exception {
-        test(() -> {
-            Employee result = null;
+        ExecutorService service = Executors.newFixedThreadPool(4);
 
+        test(() -> {
             // TODO использовать CompletableFuture<T> и метод getEmployeeInFuture: Person -> CompletableFuture<Employee>
+            CompletableFuture<Employee> employeeFuture = getEmployeeInFuture(getPerson("Дмитрий", "Сашков"));
+            employeeFuture.join();
+            Employee result = employeeFuture.get();
 
             return result;
         });
@@ -72,7 +75,7 @@ public class Exercise1 {
         Person person;
         // For example load from another service
         TimeUnit.SECONDS.sleep(2);
-        return person = new Person(name, surname, 25);
+        return person = new Person(name, surname, 24);
     }
 
     // TODO использовать в vanillaFutureExample
@@ -90,6 +93,9 @@ public class Exercise1 {
         Employee employee;
         TimeUnit.SECONDS.sleep(2);
         // For example load from another service
-        throw new UnsupportedOperationException();
+
+        CompletableFuture<Employee> res = new CompletableFuture<Employee>();
+        res.complete(new Employee(person, Collections.emptyList()));
+        return res;
     }
 }
