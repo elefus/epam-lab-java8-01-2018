@@ -15,7 +15,7 @@ public class IntArraySpliterator extends Spliterators.AbstractIntSpliterator {
     }
 
     private IntArraySpliterator(int[] data, int startInclusive, int endExclusive) {
-        super(data.length, Spliterator.IMMUTABLE | Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.SIZED);
+        super(endExclusive - startInclusive, Spliterator.IMMUTABLE | Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.SIZED);
         this.data = data;
         this.startInclusive = startInclusive;
         this.endExclusive = endExclusive;
