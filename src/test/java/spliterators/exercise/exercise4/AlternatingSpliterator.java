@@ -7,33 +7,49 @@ import java.util.stream.Stream;
 
 public class AlternatingSpliterator<T> extends Spliterators.AbstractSpliterator<T> {
 
-    private AlternatingSpliterator(long estimatedSize, int characteristics, Spliterator<T> first, Spliterator<T> second) {
-        super(0, 0);
-        throw new UnsupportedOperationException();
+    private Spliterator<T> first;
+    private Spliterator<T> second;
+
+    private AlternatingSpliterator(
+            long estimatedSize, int characteristics, Spliterator<T> first, Spliterator<T> second) {
+        super(estimatedSize, characteristics);
+
+        this.first = first;
+        this.second = second;
     }
 
-    public static <T> AlternatingSpliterator<T> combine(Stream<T> firstStream, Stream<T> secondStream) {
-        throw new UnsupportedOperationException();
+    public static <T> AlternatingSpliterator<T> combine(
+            Stream<T> firstStream, Stream<T> secondStream) {
+
+        Spliterator<T> firstSpliterator = firstStream.spliterator();
+        Spliterator<T> secondSpliterator = secondStream.spliterator();
+
+        return new AlternatingSpliterator<>(
+                firstSpliterator.estimateSize() + secondSpliterator.estimateSize(),
+                firstSpliterator.characteristics() | secondSpliterator.characteristics(),
+                firstSpliterator, secondSpliterator);
     }
 
     @Override
     public boolean tryAdvance(Consumer<? super T> action) {
-        throw new UnsupportedOperationException();
-
+        return false;
     }
 
     @Override
     public void forEachRemaining(Consumer<? super T> action) {
-        throw new UnsupportedOperationException();
+        while (first.estimateSize() > 0 || second.estimateSize() > 0) {
+            first.tryAdvance(action);
+            second.tryAdvance(action);
+        }
     }
 
     @Override
     public long getExactSizeIfKnown() {
-        throw new UnsupportedOperationException();
+        return first.estimateSize() + second.estimateSize();
     }
 
     @Override
     public boolean hasCharacteristics(int characteristics) {
-        throw new UnsupportedOperationException();
+        return characteristics == (ORDERED | NONNULL | SIZED | IMMUTABLE | SUBSIZED);
     }
 }
