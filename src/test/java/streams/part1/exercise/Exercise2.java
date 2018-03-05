@@ -1,6 +1,7 @@
 package streams.part1.exercise;
 
 import lambda.data.Employee;
+import lambda.data.JobHistoryEntry;
 import lambda.data.Person;
 import lambda.part3.example.Example1;
 import org.junit.Test;
@@ -16,7 +17,11 @@ public class Exercise2 {
     public void calcAverageAgeOfEmployees() {
         List<Employee> employees = Example1.getEmployees();
 
-        Double expected = null;
+        Double expected = employees.stream()
+                                   .map(Employee::getPerson)
+                                   .mapToInt(Person::getAge)
+                                   .average()
+                                   .orElseThrow(IllegalStateException::new);
 
         assertEquals(33.66, expected, 0.1);
     }
@@ -25,7 +30,11 @@ public class Exercise2 {
     public void findPersonWithLongestFullName() {
         List<Employee> employees = Example1.getEmployees();
 
-        Person expected = null;
+        Person expected = employees.stream()
+                                   .map(Employee::getPerson)
+//                                 .max(Comparator.comparing(person -> person.getFullName().length()))
+                                   .max(Comparator.comparing(Person::getFullName, Comparator.comparingInt(String::length)))
+                                   .orElseThrow(IllegalStateException::new);
 
         assertEquals(expected, employees.get(1).getPerson());
     }
@@ -34,7 +43,11 @@ public class Exercise2 {
     public void findEmployeeWithMaximumDurationAtOnePosition() {
         List<Employee> employees = Example1.getEmployees();
 
-        Employee expected = null;
+        Employee expected = employees.stream().max(Comparator.comparingInt(employee -> employee.getJobHistory().stream()
+                                                                                               .mapToInt(JobHistoryEntry::getDuration)
+                                                                                               .max()
+                                                                                               .orElse(0)))
+                                     .orElseThrow(IllegalStateException::new);
 
         assertEquals(expected, employees.get(4));
     }
@@ -48,7 +61,14 @@ public class Exercise2 {
     public void calcTotalSalaryWithCoefficientWorkExperience() {
         List<Employee> employees = Example1.getEmployees();
 
-        Double expected = null;
+        int baseSalary = 75_000;
+
+        Double expected = employees.stream()
+                                   .map(employee -> employee.getJobHistory().stream()
+                                                            .reduce((first, second) -> second).orElseThrow(IllegalStateException::new))
+                                   .mapToDouble(jobHistoryEntry -> jobHistoryEntry.getDuration() <= 3 ? baseSalary : baseSalary * 1.2)
+                                   .sum();
+
 
         assertEquals(465000.0, expected, 0.001);
     }
