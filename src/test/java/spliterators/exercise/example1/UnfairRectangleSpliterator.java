@@ -1,5 +1,7 @@
 package spliterators.exercise.example1;
 
+import java.util.Arrays;
+import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.IntConsumer;
 
@@ -15,32 +17,47 @@ public class UnfairRectangleSpliterator extends Spliterators.AbstractIntSplitera
      * 2 3 / 4 5 6
      * 2 4 5 6 7
      */
+
+    private int startLineInclusive;
+    private int endLineExclusive;
+    private int[][] data;
+
     public UnfairRectangleSpliterator(int[][] data) {
-        this();
+        this(data, 0, data.length);
     }
 
-    private UnfairRectangleSpliterator() {
-        super(0, 0);
-        throw new UnsupportedOperationException();
+    private UnfairRectangleSpliterator(int[][] data, int startLineInclusive, int endLineExclusive) {
+        super(endLineExclusive - startLineInclusive,
+ Spliterator.IMMUTABLE | Spliterator.NONNULL | Spliterator.ORDERED | Spliterator.SIZED);
+        this.data = data;
+        this.startLineInclusive = startLineInclusive;
+        this.endLineExclusive = endLineExclusive;
     }
 
     @Override
     public OfInt trySplit() {
-        throw new UnsupportedOperationException();
+        int mid = startLineInclusive + ((endLineExclusive-startLineInclusive) / 2);
+        return new UnfairRectangleSpliterator(data, startLineInclusive, startLineInclusive = mid);
     }
 
     @Override
     public long estimateSize() {
-        throw new UnsupportedOperationException();
+        return  endLineExclusive-startLineInclusive;
     }
 
     @Override
     public boolean tryAdvance(IntConsumer action) {
-        throw new UnsupportedOperationException();
+        if (startLineInclusive == endLineExclusive ) {
+            return false;
+        }
+        Arrays.stream(data[startLineInclusive++]).forEach(action);
+        return true;
     }
 
     @Override
     public void forEachRemaining(IntConsumer action) {
-        throw new UnsupportedOperationException();
+        while (startLineInclusive != endLineExclusive) {
+            Arrays.stream(data[startLineInclusive++]).forEach(action);
+        }
     }
 }
