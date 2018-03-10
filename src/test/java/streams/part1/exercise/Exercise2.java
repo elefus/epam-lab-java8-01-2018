@@ -61,7 +61,11 @@ public class Exercise2 {
     public void calcTotalSalaryWithCoefficientWorkExperience() {
         List<Employee> employees = Example1.getEmployees();
 
-        Double expected = null;
+        Double expected = employees.stream()
+                                    .map(Employee::getJobHistory)
+                                    .map(jobHistoryEntries -> jobHistoryEntries.get(jobHistoryEntries.size()-1).getDuration())
+                                    .mapToDouble(duration -> duration > 3 ? 75_000*1.2 : 75_000)
+                                    .sum();
 
         assertEquals(465000.0, expected, 0.001);
     }
