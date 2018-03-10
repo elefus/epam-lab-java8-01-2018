@@ -61,7 +61,7 @@ public class FairRectangleSpliterator extends Spliterators.AbstractIntSpliterato
     @Override
     public OfInt trySplit() {
         long rightSpliteratorStart = estimateSize() / 2;
-        if (rightSpliteratorStart <= 1){
+        if (rightSpliteratorStart <= 0){
             return null;
         }
         MatrixElement element = new MatrixElement(array, startElement.x, startElement.y);
