@@ -54,7 +54,7 @@ public class FairRectangleSpliterator extends Spliterators.AbstractIntSpliterato
     }
 
     private FairRectangleSpliterator(@NonNull int[][] array, Pointer start, Pointer end) {
-        super(end.size(start) + 1, IMMUTABLE | NONNULL | SIZED | SUBSIZED);
+        super(end.size(start) + 1, IMMUTABLE | NONNULL | SIZED );
         this.source = array;
         this.current = new Pointer(start.source, start.column, start.row);
         this.last = new Pointer(end.source, end.column, end.row);
