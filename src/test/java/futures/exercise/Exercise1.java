@@ -12,6 +12,9 @@ import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.System.lineSeparator;
@@ -23,23 +26,25 @@ public class Exercise1 {
     @Test
     public void vanillaFutureExample() throws Exception {
         test(() -> {
-            Employee result = null;
-
-            // TODO использовать Executors.newFixedThreadPool(4), Future<T> и метод getEmployee: Person -> Employee
-
-            return result;
+            final ExecutorService executorService = Executors.newFixedThreadPool(4);
+            final Future<String> fullNameFuture = executorService.submit(Exercise1::getPersonNameAndSurnameFromUser);
+            final String[] fullName = fullNameFuture.get().split(" ");
+            final Future<Person> personFuture = executorService.submit(() -> getPerson(fullName[0], fullName[1]));
+            return executorService.submit(() -> getEmployee(personFuture.get())).get();
         });
     }
 
     @Test
     public void completableFutureExample() throws Exception {
-        test(() -> {
-            Employee result = null;
-
-            // TODO использовать CompletableFuture<T> и метод getEmployeeInFuture: Person -> CompletableFuture<Employee>
-
-            return result;
-        });
+        test(() ->
+            CompletableFuture.supplyAsync(Exercise1::getPersonNameAndSurnameFromUser)
+                .thenApplyAsync(s -> {
+                    final String[] fullName = s.split(" ");
+                    return getPerson(fullName[0], fullName[1]);
+                })
+                .thenComposeAsync(Exercise1::getEmployeeInFuture)
+                .join()
+        );
     }
 
     private static void test(Callable<Employee> task) throws Exception {
@@ -47,7 +52,7 @@ public class Exercise1 {
 
         Employee actual = performWithCustomSystemIn(task, input);
 
-        assertEquals(new Employee(new Person("Дмитрий", "Сашков", 24), Collections.emptyList()), actual);
+        assertEquals(new Employee(new Person("Дмитрий", "Сашков", 25), Collections.emptyList()), actual);
     }
 
     private static <T> T performWithCustomSystemIn(Callable<T> task, InputStream input) throws Exception {
@@ -75,7 +80,6 @@ public class Exercise1 {
         return person = new Person(name, surname, 25);
     }
 
-    // TODO использовать в vanillaFutureExample
     @SneakyThrows
     private static Employee getEmployee(Person person) {
         Employee employee;
@@ -84,12 +88,11 @@ public class Exercise1 {
         return employee = new Employee(person, Collections.emptyList());
     }
 
-    // TODO использовать в completableFutureExample
     @SneakyThrows
     private static CompletableFuture<Employee> getEmployeeInFuture(Person person) {
         Employee employee;
         TimeUnit.SECONDS.sleep(2);
         // For example load from another service
-        throw new UnsupportedOperationException();
+        return CompletableFuture.completedFuture(getEmployee(person));
     }
 }
