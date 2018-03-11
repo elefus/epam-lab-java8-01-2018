@@ -1,5 +1,7 @@
 package spliterators.exercise.example1;
 
+import java.util.Arrays;
+import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.IntConsumer;
 
@@ -15,32 +17,43 @@ public class UnfairRectangleSpliterator extends Spliterators.AbstractIntSplitera
      * 2 3 / 4 5 6
      * 2 4 5 6 7
      */
+
+    private int[][] data;
+    private int from;
+    private int to;
+
     public UnfairRectangleSpliterator(int[][] data) {
-        this();
+        this(data, 0, data.length);
     }
 
-    private UnfairRectangleSpliterator() {
-        super(0, 0);
-        throw new UnsupportedOperationException();
+    private UnfairRectangleSpliterator(int[][] data, int from, int to) {
+        super(to-from,Spliterator.SIZED | Spliterator.SUBSIZED | Spliterator.NONNULL | Spliterator.IMMUTABLE);
+        this.data = data;
+        this.from = from;
+        this.to = to;
     }
 
     @Override
     public OfInt trySplit() {
-        throw new UnsupportedOperationException();
+        return new UnfairRectangleSpliterator(data, from, to = from + (int)estimateSize() / 2);
     }
 
     @Override
     public long estimateSize() {
-        throw new UnsupportedOperationException();
+        return from-to;
     }
 
     @Override
     public boolean tryAdvance(IntConsumer action) {
-        throw new UnsupportedOperationException();
+        if(from == to) return false;
+        Arrays.stream(data[from++]).forEach(action);
+        return true;
     }
 
     @Override
     public void forEachRemaining(IntConsumer action) {
-        throw new UnsupportedOperationException();
+        while(from != to) {
+            Arrays.stream(data[from++]).forEach(action);
+        }
     }
 }
