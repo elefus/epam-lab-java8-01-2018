@@ -1,7 +1,6 @@
 package spliterators.exercise.example1;
 
-import lombok.NoArgsConstructor;
-
+import java.util.Arrays;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.IntConsumer;
@@ -21,7 +20,7 @@ public class UnfairRectangleSpliterator extends Spliterators.AbstractIntSplitera
      * 2 3 / 4 5 6
      * 2 4 5 6 7
      */
-    public UnfairRectangleSpliterator(int[][] source) {
+    UnfairRectangleSpliterator(int[][] source) {
         this(source, 0, source.length);
     }
 
@@ -38,23 +37,26 @@ public class UnfairRectangleSpliterator extends Spliterators.AbstractIntSplitera
 
     @Override
     public OfInt trySplit() {
-        return new UnfairRectangleSpliterator(source, start, start += ((end - start) / 2));
+        return new UnfairRectangleSpliterator(source, start, start += (end - start) / 2);
     }
 
     @Override
     public long estimateSize() {
-        end - start
+        return end - start;
     }
 
     @Override
     public boolean tryAdvance(IntConsumer action) {
         if (end == start)
             return false;
-
+        Arrays.stream(source[start++]).forEach(action);
+        return true;
     }
 
     @Override
     public void forEachRemaining(IntConsumer action) {
-        throw new UnsupportedOperationException();
+        while (start != end) {
+            Arrays.stream(source[start++]).forEach(action);
+        }
     }
 }
