@@ -1,12 +1,19 @@
 package streams.part2.exercise;
 
 import lambda.data.Employee;
+import lambda.data.JobHistoryEntry;
 import lambda.data.Person;
 import lambda.part3.example.Example1;
 import org.junit.Test;
+import streams.part2.example.Example3;
+import streams.part2.example.data.PersonDurationPair;
+import streams.part2.example.data.PersonEmployerDuration;
+import streams.part2.example.data.PersonEmployerPair;
 
 import java.util.*;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toMap;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("ConstantConditions")
@@ -68,7 +75,10 @@ public class Exercise2 {
     public void employersStuffList() {
         List<Employee> employees = Example1.getEmployees();
 
-        Map<String, Set<Person>> result = null;
+        Map<String, Set<Person>> result = employees.stream()
+                                                   .parallel()
+                                                   .flatMap(Exercise2::getPersonEmployerPairStream)
+                                                   .reduce(new HashMap<>(), Exercise2::addToMap, Exercise2::mergeMaps);
 
         Map<String, Set<Person>> expected = new HashMap<>();
         expected.put("yandex", new HashSet<>(Collections.singletonList(employees.get(2).getPerson())));
@@ -88,6 +98,33 @@ public class Exercise2 {
             employees.get(5).getPerson()
         )));
         assertEquals(expected, result);
+    }
+
+    private static Stream<PersonEmployerPair> getPersonEmployerPairStream(Employee employee) {
+        return employee.getJobHistory()
+                       .stream()
+                       .map(JobHistoryEntry::getEmployer)
+                       .map(employer -> new PersonEmployerPair(employee.getPerson(), employer));
+    }
+
+    private static HashMap<String, Set<Person>> addToMap(Map<String, Set<Person>> map, PersonEmployerPair pair) {
+        HashMap<String, Set<Person>> res = new HashMap<>(map);
+        res.compute(pair.getEmployer(), (employer, persons) -> {
+            persons = persons == null ? new HashSet<>() : persons;
+            persons.add(pair.getPerson());
+            return persons;
+        });
+        return res;
+    }
+
+    private static HashMap<String, Set<Person>> mergeMaps(HashMap<String, Set<Person>> left, HashMap<String, Set<Person>> right) {
+        HashMap<String, Set<Person>> res = new HashMap<>(left);
+        right.forEach((position, persons) -> res.merge(position, persons,
+                (leftPersons, rightPersons) -> {
+                    leftPersons.addAll(rightPersons);
+                    return leftPersons;
+                }));
+        return res;
     }
 
     /**
@@ -142,7 +179,11 @@ public class Exercise2 {
     public void indexByFirstEmployer() {
         List<Employee> employees = Example1.getEmployees();
 
-        Map<String, Set<Person>> result = null;
+        Map<String, Set<Person>> result = employees.stream()
+                                                   .map(employee -> new PersonEmployerPair(employee.getPerson(),
+                                                                   employee.getJobHistory().get(0).getEmployer()))
+                                                   .reduce(new HashMap<>(), Exercise2::addToMap, Exercise2::mergeMaps);
+
 
         Map<String, Set<Person>> expected = new HashMap<>();
         expected.put("yandex", new HashSet<>(Collections.singletonList(employees.get(2).getPerson())));
@@ -166,7 +207,18 @@ public class Exercise2 {
     public void greatestExperiencePerEmployer() {
         List<Employee> employees = Example1.getEmployees();
 
-        Map<String, Person> collect = null;
+        Map<String, Person> collect = employees.stream()
+                                               .flatMap(employee -> employee.getJobHistory()
+                                                                            .stream()
+                                                                            .collect(toMap(JobHistoryEntry::getEmployer,
+                                                                                    entry -> new PersonEmployerDuration(employee.getPerson(), entry.getEmployer(), entry.getDuration()),
+                                                                                    (pair1, pair2) -> new PersonEmployerDuration(pair1.getPerson(), pair1.getEmployer(), pair1.getDuration() + pair2.getDuration())))
+                                                                            .entrySet()
+                                                                            .stream())
+                                               .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (pair1, pair2) -> pair1.getDuration() > pair2.getDuration() ? pair1 : pair2))
+                                               .entrySet()
+                                               .stream()
+                                               .collect(toMap(Map.Entry::getKey, entry -> entry.getValue().getPerson()));
 
         Map<String, Person> expected = new HashMap<>();
         expected.put("EPAM", employees.get(4).getPerson());
