@@ -28,7 +28,9 @@ public class AdvancedStreamImpl<T> implements AdvancedStream<T> {
 
     @Override
     public AdvancedStream<T> dropWhile(Predicate<? super T> predicate) {
-        return null;
+        return new AdvancedStreamImpl<>(StreamSupport.stream(
+            new DropWhileSpliterator<>(source.spliterator(), predicate),
+            source.isParallel()));
     }
 
     @Override
