@@ -7,33 +7,56 @@ import java.util.stream.Stream;
 
 public class AlternatingSpliterator<T> extends Spliterators.AbstractSpliterator<T> {
 
+    private final Spliterator<T> first;
+    private final Spliterator<T> second;
+
     private AlternatingSpliterator(long estimatedSize, int characteristics, Spliterator<T> first, Spliterator<T> second) {
-        super(0, 0);
-        throw new UnsupportedOperationException();
+        super(estimatedSize, check(characteristics, first, second));
+        this.first = first;
+        this.second = second;
+    }
+
+    private static <T> int check(int characteristics, Spliterator<T> first, Spliterator<T> second) {
+        int characteristicsNeeded = Spliterator.SIZED | Spliterator.IMMUTABLE  | Spliterator.SUBSIZED | Spliterator.ORDERED;
+        if(first.hasCharacteristics(characteristicsNeeded) && second.hasCharacteristics(characteristicsNeeded)) return characteristics;
+        throw new IllegalArgumentException("Illegal characteristics");
     }
 
     public static <T> AlternatingSpliterator<T> combine(Stream<T> firstStream, Stream<T> secondStream) {
-        throw new UnsupportedOperationException();
+        Spliterator<T> first = firstStream.spliterator();
+        Spliterator<T> second = secondStream.spliterator();
+        return new AlternatingSpliterator(first.getExactSizeIfKnown() + second.getExactSizeIfKnown(),
+                first.characteristics() | second.characteristics(),
+                first, second);
     }
 
     @Override
     public boolean tryAdvance(Consumer<? super T> action) {
-        throw new UnsupportedOperationException();
-
+        return false;
     }
 
     @Override
     public void forEachRemaining(Consumer<? super T> action) {
-        throw new UnsupportedOperationException();
+        while(first.getExactSizeIfKnown() != 0 && second.getExactSizeIfKnown() != 0) {
+            first.tryAdvance(action);
+            second.tryAdvance(action);
+        }
+        while(first.getExactSizeIfKnown() != 0) {
+            first.tryAdvance(action);
+        }
+        while(second.getExactSizeIfKnown() != 0) {
+            second.tryAdvance(action);
+        }
     }
 
     @Override
     public long getExactSizeIfKnown() {
-        throw new UnsupportedOperationException();
+        return first.getExactSizeIfKnown() + second.getExactSizeIfKnown();
     }
 
     @Override
     public boolean hasCharacteristics(int characteristics) {
-        throw new UnsupportedOperationException();
+        if(first.hasCharacteristics(characteristics) && second.hasCharacteristics(characteristics)) return true;
+        return false;
     }
 }
