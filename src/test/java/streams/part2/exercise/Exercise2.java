@@ -1,12 +1,19 @@
 package streams.part2.exercise;
 
 import lambda.data.Employee;
+import lambda.data.JobHistoryEntry;
 import lambda.data.Person;
 import lambda.part3.example.Example1;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.junit.Test;
 
-import java.util.*;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.maxBy;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("ConstantConditions")
@@ -64,11 +71,36 @@ public class Exercise2 {
      *    "T-Systems" -> [ {Анна Светличная 21} ]
      * ]
      */
+
+    @Data
+    @AllArgsConstructor
+    private class Pair<T1, T2> {
+        private final T1 value1;
+        private final T2 value2;
+    }
+
+
     @Test
     public void employersStuffList() {
         List<Employee> employees = Example1.getEmployees();
 
-        Map<String, Set<Person>> result = null;
+
+        Map<String, Set<Person>> result =
+        employees.stream()
+                .flatMap(
+                        employee ->
+                                employee.getJobHistory().stream().map(
+                                        jhe -> new Pair<>(employee.getPerson(), jhe.getEmployer())
+                                )
+                ).collect(
+                        Collectors.groupingBy(
+                            Pair::getValue2,
+                            Collectors.mapping(
+                                    Pair::getValue1,
+                                    Collectors.toSet()
+                            )
+                        )
+                );
 
         Map<String, Set<Person>> expected = new HashMap<>();
         expected.put("yandex", new HashSet<>(Collections.singletonList(employees.get(2).getPerson())));
@@ -142,7 +174,12 @@ public class Exercise2 {
     public void indexByFirstEmployer() {
         List<Employee> employees = Example1.getEmployees();
 
-        Map<String, Set<Person>> result = null;
+        Map<String, Set<Person>> result = employees.stream().collect(
+                Collectors.groupingBy(
+                        e -> e.getJobHistory().get(0).getEmployer(),
+                        Collectors.mapping(Employee::getPerson, Collectors.toSet())
+                )
+        );
 
         Map<String, Set<Person>> expected = new HashMap<>();
         expected.put("yandex", new HashSet<>(Collections.singletonList(employees.get(2).getPerson())));
@@ -158,6 +195,7 @@ public class Exercise2 {
         assertEquals(expected, result);
     }
 
+
     /**
      * Преобразовать список сотрудников в отображение [компания -> сотрудник, суммарно проработавший в ней наибольшее время].
      * Гарантируется, что такой сотрудник будет один.
@@ -166,11 +204,30 @@ public class Exercise2 {
     public void greatestExperiencePerEmployer() {
         List<Employee> employees = Example1.getEmployees();
 
-        Map<String, Person> collect = null;
+        @Data
+        @AllArgsConstructor
+        class EmployerDurationPerson {
+            String employer;
+            int duration;
+            Person person;
+        }
+
+        Map<String, Person> collect = employees.stream()
+                .parallel()
+                .flatMap(employee -> employee.getJobHistory()
+                        .stream()
+                        .collect(groupingBy(JobHistoryEntry::getEmployer, summingInt(JobHistoryEntry::getDuration)))
+                        .entrySet()
+                        .stream()
+                        .map(entry -> new EmployerDurationPerson(entry.getKey(), entry.getValue(), employee.getPerson())))
+                .collect(groupingBy(EmployerDurationPerson::getEmployer,
+                        collectingAndThen(maxBy(Comparator.comparingInt(EmployerDurationPerson::getDuration)),
+                                entry -> entry.orElseThrow(IllegalStateException::new).getPerson())));
+
 
         Map<String, Person> expected = new HashMap<>();
         expected.put("EPAM", employees.get(4).getPerson());
-        expected.put("google", employees.get(1).getPerson());
+        expected.put("google", employees.get(0).getPerson());
         expected.put("yandex", employees.get(2).getPerson());
         expected.put("mail.ru", employees.get(2).getPerson());
         expected.put("T-Systems", employees.get(5).getPerson());
