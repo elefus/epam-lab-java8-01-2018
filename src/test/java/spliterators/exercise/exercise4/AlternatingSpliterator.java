@@ -7,33 +7,41 @@ import java.util.stream.Stream;
 
 public class AlternatingSpliterator<T> extends Spliterators.AbstractSpliterator<T> {
 
+    private final Spliterator<T> first, second;
+
     private AlternatingSpliterator(long estimatedSize, int characteristics, Spliterator<T> first, Spliterator<T> second) {
-        super(0, 0);
-        throw new UnsupportedOperationException();
+        super(estimatedSize, characteristics);
+        this.first = first;
+        this.second = second;
     }
 
     public static <T> AlternatingSpliterator<T> combine(Stream<T> firstStream, Stream<T> secondStream) {
-        throw new UnsupportedOperationException();
+        final Spliterator<T> first = firstStream.spliterator(), second = secondStream.spliterator();
+        return new AlternatingSpliterator<>(
+            first.estimateSize() + second.estimateSize(),
+            first.characteristics() | second.characteristics(),
+            first,
+            second);
     }
 
     @Override
     public boolean tryAdvance(Consumer<? super T> action) {
-        throw new UnsupportedOperationException();
-
+        return false;
     }
 
     @Override
     public void forEachRemaining(Consumer<? super T> action) {
-        throw new UnsupportedOperationException();
+        first.forEachRemaining(action);
+        second.forEachRemaining(action);
     }
 
     @Override
     public long getExactSizeIfKnown() {
-        throw new UnsupportedOperationException();
+        return first.getExactSizeIfKnown() + second.getExactSizeIfKnown();
     }
 
     @Override
     public boolean hasCharacteristics(int characteristics) {
-        throw new UnsupportedOperationException();
+        return first.hasCharacteristics(characteristics) && second.hasCharacteristics(characteristics);
     }
 }
