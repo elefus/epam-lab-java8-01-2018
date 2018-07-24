@@ -10,9 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static java.lang.System.lineSeparator;
 import static org.junit.Assert.assertEquals;
@@ -27,6 +25,11 @@ public class Exercise1 {
 
             // TODO использовать Executors.newFixedThreadPool(4), Future<T> и метод getEmployee: Person -> Employee
 
+            ExecutorService executorService = Executors.newFixedThreadPool(4);
+            Future<String> futureNameAndSurname = executorService.submit(Exercise1::getPersonNameAndSurnameFromUser);
+            Future<Person> futurePerson = executorService.submit(() -> getPerson(futureNameAndSurname.get().split(" ")[0], futureNameAndSurname.get().split(" ")[1]));
+            result = executorService.submit(() -> getEmployee(futurePerson.get())).get();
+
             return result;
         });
     }
@@ -37,8 +40,11 @@ public class Exercise1 {
             Employee result = null;
 
             // TODO использовать CompletableFuture<T> и метод getEmployeeInFuture: Person -> CompletableFuture<Employee>
+            CompletableFuture<Employee> employeeCompletableFuture = CompletableFuture.supplyAsync(Exercise1::getPersonNameAndSurnameFromUser)
+                                                                                     .thenApplyAsync(s -> getPerson(s.split(" ")[0], s.split(" ")[1]))
+                                                                                     .thenComposeAsync(Exercise1::getEmployeeInFuture);
 
-            return result;
+            return employeeCompletableFuture.join();
         });
     }
 
@@ -47,7 +53,7 @@ public class Exercise1 {
 
         Employee actual = performWithCustomSystemIn(task, input);
 
-        assertEquals(new Employee(new Person("Дмитрий", "Сашков", 24), Collections.emptyList()), actual);
+        assertEquals(new Employee(new Person("Дмитрий", "Сашков", 25), Collections.emptyList()), actual);
     }
 
     private static <T> T performWithCustomSystemIn(Callable<T> task, InputStream input) throws Exception {
@@ -90,6 +96,6 @@ public class Exercise1 {
         Employee employee;
         TimeUnit.SECONDS.sleep(2);
         // For example load from another service
-        throw new UnsupportedOperationException();
+        return CompletableFuture.completedFuture(getEmployee(person));
     }
 }
